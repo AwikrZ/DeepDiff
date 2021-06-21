@@ -25,19 +25,30 @@ public extension UICollectionView {
     completion: ((Bool) -> Void)? = nil) {
     
     let changesWithIndexPath = IndexPathConverter().convert(changes: changes, section: section)
-    
-    performBatchUpdates({
-      updateData()
-      insideUpdate(changesWithIndexPath: changesWithIndexPath)
-    }, completion: { finished in
-      completion?(finished)
-    })
-
-    // reloadRows needs to be called outside the batch
-    outsideUpdate(changesWithIndexPath: changesWithIndexPath)
+    reload(changesWithIndexPath: changesWithIndexPath,
+           section: section,
+           updateData: updateData,
+           completion: completion)
   }
   
-  // MARK: - Helper
+    func reload(
+        changesWithIndexPath: ChangeWithIndexPath,
+      section: Int = 0,
+      updateData: () -> Void,
+      completion: ((Bool) -> Void)? = nil) {
+      
+      performBatchUpdates({
+        updateData()
+        insideUpdate(changesWithIndexPath: changesWithIndexPath)
+      }, completion: { finished in
+        completion?(finished)
+      })
+
+      // reloadRows needs to be called outside the batch
+      outsideUpdate(changesWithIndexPath: changesWithIndexPath)
+    }
+
+    // MARK: - Helper
   
   private func insideUpdate(changesWithIndexPath: ChangeWithIndexPath) {
     changesWithIndexPath.deletes.executeIfPresent {
